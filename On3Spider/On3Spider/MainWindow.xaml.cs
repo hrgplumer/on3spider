@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
+using On3Spider.Infrastructure;
 
 namespace On3Spider
 {
@@ -36,7 +37,8 @@ namespace On3Spider
 
             if (openFileDialog.ShowDialog() == true)
             {
-                
+                var reader = new ExcelReader(openFileDialog.FileName);
+                reader.ReadUrls();
             }
         }
     }
