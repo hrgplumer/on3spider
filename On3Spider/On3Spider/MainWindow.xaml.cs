@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 using On3Spider.Infrastructure;
+using SpiderEngine.Engine;
 
 namespace On3Spider
 {
@@ -35,11 +36,17 @@ namespace On3Spider
                 Filter = "Excel files (*.xlsx)|*.xlsx"
             };
 
-            if (openFileDialog.ShowDialog() == true)
+            if (openFileDialog.ShowDialog() != true) return;
+
+            var reader = new ExcelReader(openFileDialog.FileName);
+            var urls = reader.ReadUrls().ToList();
+
+            if (!urls.Any())
             {
-                var reader = new ExcelReader(openFileDialog.FileName);
-                reader.ReadUrls();
+                return;
             }
+
+            var crawler = new Crawler(urls);
         }
     }
 }
