@@ -31,14 +31,17 @@ namespace On3Spider
 
         private void btnOpenFile_Click(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog()
-            {
-                Filter = "Excel files (*.xlsx)|*.xlsx"
-            };
+            //var openFileDialog = new OpenFileDialog()
+            //{
+            //    Filter = "Excel files (*.xlsx)|*.xlsx"
+            //};
 
-            if (openFileDialog.ShowDialog() != true) return;
+            //if (openFileDialog.ShowDialog() != true) return;
 
-            var reader = new ExcelReader(openFileDialog.FileName);
+            var fileName = //openFileDialog.FileName;
+                @"E:\j\work\personal\projects\on3\test sheets\simple_test_3_urls.xlsx";
+
+            var reader = new ExcelReader(fileName);
             var urls = reader.ReadUrls().ToList();
 
             if (!urls.Any())
@@ -47,6 +50,7 @@ namespace On3Spider
             }
 
             var crawler = new Crawler(urls);
+            crawler.CrawlAsync();
         }
     }
 }

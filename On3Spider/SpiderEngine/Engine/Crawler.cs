@@ -1,66 +1,89 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Abot.Crawler;
 using Abot.Poco;
+using Abot.Util;
+using AbotX.Crawler;
+using AbotX.Parallel;
+using AbotX.Poco;
+using log4net;
+using log4net.Config;
 
 namespace SpiderEngine.Engine
 {
+    /// <summary>
+    /// Wrapper class for AbotX ParallelCrawlerEngine that handles configuration, startup, shutdown
+    /// </summary>
     public class Crawler
     {
-        private IEnumerable<string> Urls { get; set; }
+        private readonly ParallelCrawlerEngine _crawler;
 
-        public Crawler(IEnumerable<string> urls)
+        /// <summary>
+        /// Initializes the AbotX parallel crawler using app.config settings, to crawl the list of urls provided.
+        /// </summary>
+        /// <param name="urls">The list of urls the Crawler should visit.</param>
+        public Crawler(IEnumerable<string> urls /* inject logger, output class here */)
         {
-            Urls = urls;
+            // configure log4net -- this must be called before crawler is created
+            XmlConfigurator.Configure();
 
-            var crawlConfig = new CrawlConfiguration();
-            crawlConfig.CrawlTimeoutSeconds = 100;
-            crawlConfig.MaxConcurrentThreads = 10;
-            crawlConfig.MaxPagesToCrawl = 1000;
-            crawlConfig.UserAgentString = "abot v1.0 http://code.google.com/p/abot";
+            var provider = new SiteToCrawlProvider();
+            provider.AddSitesToCrawl(urls.Select(url => 
+            new SiteToCrawl()
+            {
+                Uri = new Uri(url)
+            }));
 
-            var crawler = new PoliteWebCrawler(crawlConfig);
-            crawler.PageCrawlStartingAsync += crawler_ProcessPageCrawlStarting;
-            crawler.PageCrawlCompletedAsync += crawler_ProcessPageCrawlCompleted;
-            crawler.PageCrawlDisallowedAsync += crawler_PageCrawlDisallowed;
-            crawler.PageLinksCrawlDisallowedAsync += crawler_PageLinksCrawlDisallowed;
+            _crawler = new ParallelCrawlerEngine(provider);
 
-            crawler.Crawl(new Uri(urls.First()));
+            //Register for site level events
+            _crawler.AllCrawlsCompleted += (sender, eventArgs) =>
+            {
+                Trace.WriteLine("Completed crawling all sites");
+            };
+            _crawler.SiteCrawlCompleted += (sender, eventArgs) =>
+            {
+                Trace.WriteLine(String.Format("Completed crawling site {0}", eventArgs.CrawledSite.SiteToCrawl.Uri));
+            };
+            _crawler.CrawlerInstanceCreated += (sender, eventArgs) =>
+            {
+                //Register for crawler level events. These are Abot's events!!!
+                eventArgs.Crawler.PageCrawlCompleted += (abotSender, abotEventArgs) =>
+                {
+                    CrawledPage crawledPage = abotEventArgs.CrawledPage;
+
+                    if (crawledPage.WebException != null || crawledPage.HttpWebResponse.StatusCode != HttpStatusCode.OK)
+                        Trace.WriteLine(String.Format("Crawl of page failed {0}", crawledPage.Uri.AbsoluteUri));
+                    else
+                        Trace.WriteLine(String.Format("Crawl of page succeeded {0}", crawledPage.Uri.AbsoluteUri));
+
+                    if (string.IsNullOrEmpty(crawledPage.Content.Text))
+                        Trace.WriteLine(String.Format("Page had no content {0}", crawledPage.Uri.AbsoluteUri));
+                };
+            };
         }
 
-        void crawler_ProcessPageCrawlStarting(object sender, PageCrawlStartingArgs e)
+        /// <summary>
+        /// Begins crawling pages asynchronously.
+        /// </summary>
+        public void CrawlAsync()
         {
-            PageToCrawl pageToCrawl = e.PageToCrawl;
-            Console.WriteLine("About to crawl link {0} which was found on page {1}", pageToCrawl.Uri.AbsoluteUri, pageToCrawl.ParentUri.AbsoluteUri);
+            _crawler.StartAsync();
         }
 
-        void crawler_ProcessPageCrawlCompleted(object sender, PageCrawlCompletedArgs e)
+        /// <summary>
+        /// Stops the crawl.
+        /// </summary>
+        /// <param name="isHardStop">(Optional) Determins whether this crawl stop is a hard stop. 
+        ///  A hard stop will stop immediately, a soft one will wait for any current crawls to finish.</param>
+        public void StopCrawl(bool isHardStop = false)
         {
-            CrawledPage crawledPage = e.CrawledPage;
-
-            if (crawledPage.WebException != null || crawledPage.HttpWebResponse.StatusCode != HttpStatusCode.OK)
-                Console.WriteLine("Crawl of page failed {0}", crawledPage.Uri.AbsoluteUri);
-            else
-                Console.WriteLine("Crawl of page succeeded {0}", crawledPage.Uri.AbsoluteUri);
-
-            if (string.IsNullOrEmpty(crawledPage.Content.Text))
-                Console.WriteLine("Page had no content {0}", crawledPage.Uri.AbsoluteUri);
-        }
-
-        void crawler_PageLinksCrawlDisallowed(object sender, PageLinksCrawlDisallowedArgs e)
-        {
-            CrawledPage crawledPage = e.CrawledPage;
-            Console.WriteLine("Did not crawl the links on page {0} due to {1}", crawledPage.Uri.AbsoluteUri, e.DisallowedReason);
-        }
-
-        void crawler_PageCrawlDisallowed(object sender, PageCrawlDisallowedArgs e)
-        {
-            PageToCrawl pageToCrawl = e.PageToCrawl;
-            Console.WriteLine("Did not crawl page {0} due to {1}", pageToCrawl.Uri.AbsoluteUri, e.DisallowedReason);
+            _crawler.Stop(isHardStop);
         }
     }
 }
