@@ -11,7 +11,9 @@ namespace SpiderEngine.Interface
 {
     public interface IQueueManager<T>
     {
-        bool Enqueue(T item);
+        void Enqueue(T item);
         bool TryDequeue(out T item);
+        bool IsEmpty();
+        int Count();
     }
 }

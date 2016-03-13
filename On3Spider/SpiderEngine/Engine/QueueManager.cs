@@ -13,14 +13,34 @@ namespace SpiderEngine.Engine
     {
         private readonly ConcurrentQueue<T> _queue;
 
-        public bool Enqueue(T item)
+        public QueueManager()
         {
-            throw new NotImplementedException();
+            _queue = new ConcurrentQueue<T>();
+        }
+
+        public QueueManager(IEnumerable<T> items)
+        {
+            _queue = new ConcurrentQueue<T>(items);
+        }  
+
+        public void Enqueue(T item)
+        {
+            _queue.Enqueue(item);
         }
 
         public bool TryDequeue(out T item)
         {
-            throw new NotImplementedException();
+            return _queue.TryDequeue(out item);
+        }
+
+        public bool IsEmpty()
+        {
+            return _queue.IsEmpty;
+        }
+
+        public int Count()
+        {
+            return _queue.Count;
         }
     }
 }

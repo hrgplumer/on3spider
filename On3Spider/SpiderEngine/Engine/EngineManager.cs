@@ -66,7 +66,7 @@ namespace SpiderEngine.Engine
 
         public void Crawler_SiteCrawlCompleted(object sender, SiteCrawlCompletedArgs args)
         {
-            Trace.WriteLine(String.Format("Completed crawling site {0}", args.CrawledSite.SiteToCrawl.Uri));
+            Trace.WriteLine($"Completed crawling site {args.CrawledSite.SiteToCrawl.Uri}");
         }
 
         public void Crawler_CrawlerInstanceCreated(object sender, CrawlerInstanceCreatedArgs args)
@@ -74,15 +74,26 @@ namespace SpiderEngine.Engine
             //Register for crawler level events. These are Abot's events!!!
             args.Crawler.PageCrawlCompleted += (abotSender, abotEventArgs) =>
             {
-                CrawledPage crawledPage = abotEventArgs.CrawledPage;
+                var crawledPage = abotEventArgs.CrawledPage;
 
                 if (crawledPage.WebException != null || crawledPage.HttpWebResponse.StatusCode != HttpStatusCode.OK)
-                    Trace.WriteLine(String.Format("Crawl of page failed {0}", crawledPage.Uri.AbsoluteUri));
+                {
+                    // an exception of some sort occured while crawling
+                    Trace.WriteLine($"Crawl of page failed {crawledPage.Uri.AbsoluteUri}");
+                }
                 else
-                    Trace.WriteLine(String.Format("Crawl of page succeeded {0}", crawledPage.Uri.AbsoluteUri));
+                {
+                    Trace.WriteLine($"Crawl of page succeeded {crawledPage.Uri.AbsoluteUri}");
+
+                    // add crawled page to queue
+                    _queue.Enqueue(crawledPage);
+                    Trace.WriteLine($"Queue contains {_queue.Count()} items");
+                }
 
                 if (string.IsNullOrEmpty(crawledPage.Content.Text))
-                    Trace.WriteLine(String.Format("Page had no content {0}", crawledPage.Uri.AbsoluteUri));
+                {
+                    Trace.WriteLine($"Page had no content {crawledPage.Uri.AbsoluteUri}");
+                }
             };
         }
 
