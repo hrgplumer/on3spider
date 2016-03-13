@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Abot.Poco;
 using Microsoft.Win32;
 using On3Spider.Infrastructure;
 using SpiderEngine.Engine;
@@ -49,8 +50,17 @@ namespace On3Spider
                 return;
             }
 
-            var crawler = new Crawler(urls);
-            crawler.CrawlAsync();
+            StartCrawlingEngine(urls);
+        }
+
+        /// <summary>
+        /// Starts the crawling engine.
+        /// </summary>
+        /// <param name="urls">The list of urls to crawl.</param>
+        private void StartCrawlingEngine(IEnumerable<string> urls)
+        {
+            var manager = new EngineManager(new Crawler(urls), new QueueManager<CrawledPage>());
+            manager.Start();
         }
     }
 }

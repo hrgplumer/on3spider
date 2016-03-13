@@ -87,6 +87,10 @@
   <ItemGroup>
     <Compile Include="Class1.cs" />
     <Compile Include="Engine\Crawler.cs" />
+    <Compile Include="Engine\EngineManager.cs" />
+    <Compile Include="Engine\QueueManager.cs" />
+    <Compile Include="Interface\ICrawler.cs" />
+    <Compile Include="Interface\IQueueManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

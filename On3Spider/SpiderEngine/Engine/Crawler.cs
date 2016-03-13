@@ -13,13 +13,14 @@ using AbotX.Parallel;
 using AbotX.Poco;
 using log4net;
 using log4net.Config;
+using SpiderEngine.Interface;
 
 namespace SpiderEngine.Engine
 {
     /// <summary>
     /// Wrapper class for AbotX ParallelCrawlerEngine that handles configuration, startup, shutdown
     /// </summary>
-    public class Crawler
+    public class Crawler : ICrawler
     {
         private readonly ParallelCrawlerEngine _crawler;
 
@@ -27,45 +28,19 @@ namespace SpiderEngine.Engine
         /// Initializes the AbotX parallel crawler using app.config settings, to crawl the list of urls provided.
         /// </summary>
         /// <param name="urls">The list of urls the Crawler should visit.</param>
-        public Crawler(IEnumerable<string> urls /* inject logger, output class here */)
+        public Crawler(IEnumerable<string> urls)
         {
             // configure log4net -- this must be called before crawler is created
             XmlConfigurator.Configure();
 
             var provider = new SiteToCrawlProvider();
-            provider.AddSitesToCrawl(urls.Select(url => 
+            provider.AddSitesToCrawl(urls.Select(url =>
             new SiteToCrawl()
             {
                 Uri = new Uri(url)
             }));
 
             _crawler = new ParallelCrawlerEngine(provider);
-
-            //Register for site level events
-            _crawler.AllCrawlsCompleted += (sender, eventArgs) =>
-            {
-                Trace.WriteLine("Completed crawling all sites");
-            };
-            _crawler.SiteCrawlCompleted += (sender, eventArgs) =>
-            {
-                Trace.WriteLine(String.Format("Completed crawling site {0}", eventArgs.CrawledSite.SiteToCrawl.Uri));
-            };
-            _crawler.CrawlerInstanceCreated += (sender, eventArgs) =>
-            {
-                //Register for crawler level events. These are Abot's events!!!
-                eventArgs.Crawler.PageCrawlCompleted += (abotSender, abotEventArgs) =>
-                {
-                    CrawledPage crawledPage = abotEventArgs.CrawledPage;
-
-                    if (crawledPage.WebException != null || crawledPage.HttpWebResponse.StatusCode != HttpStatusCode.OK)
-                        Trace.WriteLine(String.Format("Crawl of page failed {0}", crawledPage.Uri.AbsoluteUri));
-                    else
-                        Trace.WriteLine(String.Format("Crawl of page succeeded {0}", crawledPage.Uri.AbsoluteUri));
-
-                    if (string.IsNullOrEmpty(crawledPage.Content.Text))
-                        Trace.WriteLine(String.Format("Page had no content {0}", crawledPage.Uri.AbsoluteUri));
-                };
-            };
         }
 
         /// <summary>
@@ -85,5 +60,35 @@ namespace SpiderEngine.Engine
         {
             _crawler.Stop(isHardStop);
         }
+
+        #region Event Handlers
+
+        // TODO: determine if we need the Async events here, or if regular synchronous events are fine
+
+        /// <summary>
+        /// Event fired when all crawls in the crawl queue have completed.
+        /// </summary>
+        public event EventHandler<AllCrawlsCompletedArgs> AllCrawlsCompleted
+        {
+            add { _crawler.AllCrawlsCompleted += value; }
+            remove { _crawler.AllCrawlsCompleted -= value; }
+        }
+
+        /// <summary>
+        /// Event fired when crawl has completed for one site.
+        /// </summary>
+        public event EventHandler<SiteCrawlCompletedArgs> SiteCrawlCompleted
+        {
+            add { _crawler.SiteCrawlCompleted += value; }
+            remove { _crawler.SiteCrawlCompleted -= value; }
+        }
+
+        public event EventHandler<CrawlerInstanceCreatedArgs> CrawlerInstanceCreated
+        {
+            add { _crawler.CrawlerInstanceCreated += value; }
+            remove { _crawler.CrawlerInstanceCreated -= value; }
+        }
+
+        #endregion
     }
 }
