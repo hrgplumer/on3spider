@@ -56,7 +56,6 @@ namespace SpiderEngine.Engine
             _crawler.StopCrawl(isHardStop);
         }
 
-        /* will need to register for crawler's events here. on crawl complete, add the CrawledPage to the queue. */
         #region Event Handlers
 
         public void Crawler_AllCrawlsCompleted(object sender, AllCrawlsCompletedArgs args)
