@@ -5,7 +5,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Abot.Crawler;
 using Abot.Poco;
 using AbotX.Parallel;
 using SpiderEngine.Interface;
@@ -19,6 +21,8 @@ namespace SpiderEngine.Engine
     {
         private readonly ICrawler _crawler;
         private readonly IQueueManager<CrawledPage> _queue;
+
+        private bool _allCrawlsCompleted = false;
 
         /// <summary>
         /// Create a new EngineManager using the given crawler and queue.
@@ -41,9 +45,35 @@ namespace SpiderEngine.Engine
         /// <summary>
         /// Starts the web crawl.
         /// </summary>
-        public void Start()
+        public async Task StartAsync()
         {
-            _crawler.CrawlAsync();
+            _crawler.Crawl();
+            using (var processTask = ProcessCrawledPagesAsync())
+            {
+                await processTask;
+            }
+        }
+
+        private async Task ProcessCrawledPagesAsync()
+        {
+            while (!_allCrawlsCompleted)
+            {
+                CrawledPage page = null;
+                if (_queue.TryDequeue(out page))
+                {
+                    if (page == null) continue;
+
+                    Trace.WriteLine($"Dequeued page {page.Uri.AbsoluteUri}: queue has {_queue.Count()} elements remaining");
+                    // add a method here to process the page, and await it.
+                    await ProcessPage(page);
+                }
+            }
+        }
+
+        private async Task ProcessPage(CrawledPage page)
+        {
+            var analyzer = new PageAnalyzer(page);
+            Thread.Sleep(500);
         }
 
         /// <summary>
@@ -60,6 +90,7 @@ namespace SpiderEngine.Engine
 
         public void Crawler_AllCrawlsCompleted(object sender, AllCrawlsCompletedArgs args)
         {
+            _allCrawlsCompleted = true;
             Trace.WriteLine("Completed crawling all sites");
         }
 
@@ -70,30 +101,32 @@ namespace SpiderEngine.Engine
 
         public void Crawler_CrawlerInstanceCreated(object sender, CrawlerInstanceCreatedArgs args)
         {
-            //Register for crawler level events. These are Abot's events!!!
-            args.Crawler.PageCrawlCompleted += (abotSender, abotEventArgs) =>
+            // register for crawler level events. this is an abot event
+            args.Crawler.PageCrawlCompleted += Crawler_PageCrawlCompleted;
+        }
+
+        public async void Crawler_PageCrawlCompleted(object sender, PageCrawlCompletedArgs args)
+        {
+            var crawledPage = args.CrawledPage;
+
+            if (crawledPage.WebException != null || crawledPage.HttpWebResponse.StatusCode != HttpStatusCode.OK)
             {
-                var crawledPage = abotEventArgs.CrawledPage;
+                // an exception of some sort occured while crawling
+                Trace.WriteLine($"Crawl of page failed {crawledPage.Uri.AbsoluteUri}");
+            }
+            else
+            {
+                Trace.WriteLine($"Crawl of page succeeded {crawledPage.Uri.AbsoluteUri}");
 
-                if (crawledPage.WebException != null || crawledPage.HttpWebResponse.StatusCode != HttpStatusCode.OK)
-                {
-                    // an exception of some sort occured while crawling
-                    Trace.WriteLine($"Crawl of page failed {crawledPage.Uri.AbsoluteUri}");
-                }
-                else
-                {
-                    Trace.WriteLine($"Crawl of page succeeded {crawledPage.Uri.AbsoluteUri}");
+                // add crawled page to queue
+                _queue.Enqueue(crawledPage);
+                Trace.WriteLine($"Queue contains {_queue.Count()} items");
+            }
 
-                    // add crawled page to queue
-                    _queue.Enqueue(crawledPage);
-                    Trace.WriteLine($"Queue contains {_queue.Count()} items");
-                }
-
-                if (string.IsNullOrEmpty(crawledPage.Content.Text))
-                {
-                    Trace.WriteLine($"Page had no content {crawledPage.Uri.AbsoluteUri}");
-                }
-            };
+            if (string.IsNullOrEmpty(crawledPage.Content.Text))
+            {
+                Trace.WriteLine($"Page had no content {crawledPage.Uri.AbsoluteUri}");
+            }
         }
 
         #endregion

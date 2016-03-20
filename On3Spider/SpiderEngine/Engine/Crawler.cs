@@ -46,7 +46,7 @@ namespace SpiderEngine.Engine
         /// <summary>
         /// Begins crawling pages asynchronously.
         /// </summary>
-        public void CrawlAsync()
+        public void Crawl()
         {
             _crawler.StartAsync();
         }

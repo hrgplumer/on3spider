@@ -9,7 +9,7 @@ namespace SpiderEngine.Interface
 {
     public interface ICrawler
     {
-        void CrawlAsync();
+        void Crawl();
         void StopCrawl(bool isHardStop);
         event EventHandler<AllCrawlsCompletedArgs> AllCrawlsCompleted;
         event EventHandler<SiteCrawlCompletedArgs> SiteCrawlCompleted;

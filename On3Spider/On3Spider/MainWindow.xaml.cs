@@ -30,7 +30,7 @@ namespace On3Spider
             InitializeComponent();
         }
 
-        private void btnOpenFile_Click(object sender, RoutedEventArgs e)
+        private async void btnOpenFile_Click(object sender, RoutedEventArgs e)
         {
             //var openFileDialog = new OpenFileDialog()
             //{
@@ -50,17 +50,18 @@ namespace On3Spider
                 return;
             }
 
-            StartCrawlingEngine(urls);
+            // Start the crawling engine on a new thread
+            await Task.Run(() => StartCrawlingEngineAsync(urls));
         }
 
         /// <summary>
         /// Starts the crawling engine.
         /// </summary>
         /// <param name="urls">The list of urls to crawl.</param>
-        private void StartCrawlingEngine(IEnumerable<string> urls)
+        private async Task StartCrawlingEngineAsync(IEnumerable<string> urls)
         {
             var manager = new EngineManager(new Crawler(urls), new QueueManager<CrawledPage>());
-            manager.Start();
+            await manager.StartAsync();
         }
     }
 }
