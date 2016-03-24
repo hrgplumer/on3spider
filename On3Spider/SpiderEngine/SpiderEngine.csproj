@@ -92,6 +92,7 @@
     <Compile Include="Engine\QueueManager.cs" />
     <Compile Include="Interface\ICrawler.cs" />
     <Compile Include="Interface\IQueueManager.cs" />
+    <Compile Include="Models\AnalyzeResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

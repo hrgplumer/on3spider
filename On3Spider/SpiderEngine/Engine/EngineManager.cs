@@ -22,6 +22,8 @@ namespace SpiderEngine.Engine
         private readonly ICrawler _crawler;
         private readonly IQueueManager<CrawledPage> _queue;
 
+        private const int PageAnalyzeThreshold = 10;
+
         private bool _allCrawlsCompleted = false;
 
         /// <summary>
@@ -56,24 +58,36 @@ namespace SpiderEngine.Engine
 
         private async Task ProcessCrawledPagesAsync()
         {
+            var stack = new Stack<CrawledPage>();
             while (!_allCrawlsCompleted)
             {
                 CrawledPage page = null;
                 if (_queue.TryDequeue(out page))
                 {
                     if (page == null) continue;
-
                     Trace.WriteLine($"Dequeued page {page.Uri.AbsoluteUri}: queue has {_queue.Count()} elements remaining");
-                    // add a method here to process the page, and await it.
-                    await ProcessPage(page);
+
+                    // add dequeued page to stack
+                    stack.Push(page);
+
+                    // if we've reached the threshold of pages we want to process in a single thread,
+                    // create the thread and process it
+                    if (stack.Count == PageAnalyzeThreshold)
+                    {
+                        var stackItems = stack.ToArray();
+                        stack.Clear();
+                        Trace.WriteLine("cleared stack");
+                        await ProcessPage(stackItems);
+                    }
+
                 }
             }
         }
 
-        private async Task ProcessPage(CrawledPage page)
+        private async Task ProcessPage(IEnumerable<CrawledPage> pages)
         {
-            var analyzer = new PageAnalyzer(page);
-            Thread.Sleep(500);
+            var analyzer = new PageAnalyzer(pages);
+            var result = await analyzer.AnalyzeAsync();
         }
 
         /// <summary>
