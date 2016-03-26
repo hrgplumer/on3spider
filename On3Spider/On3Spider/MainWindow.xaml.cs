@@ -16,6 +16,7 @@ using System.Windows.Shapes;
 using Abot.Poco;
 using Microsoft.Win32;
 using On3Spider.Infrastructure;
+using On3Spider.Models;
 using SpiderEngine.Engine;
 
 namespace On3Spider
@@ -40,10 +41,12 @@ namespace On3Spider
             //if (openFileDialog.ShowDialog() != true) return;
 
             var fileName = //openFileDialog.FileName;
-                @"E:\j\work\personal\projects\on3\test sheets\simple_test_3_urls.xlsx";
+                //@"E:\j\work\personal\projects\on3\test sheets\simple_test_3_urls.xlsx";
+                @"E:\j\work\personal\projects\on3\test sheets\softball&baseballurls.xlsx";
+                //@"E:\j\work\personal\projects\on3\test sheets\FieldHockeyD1URLs.xlsx";
 
-            var reader = new ExcelReader(fileName);
-            var urls = reader.ReadUrls().ToList();
+            var reader = new ExcelReader<RosterSheet>(fileName);
+            var urls = reader.ReadSheet().ToList();
 
             if (!urls.Any())
             {
@@ -58,9 +61,10 @@ namespace On3Spider
         /// Starts the crawling engine.
         /// </summary>
         /// <param name="urls">The list of urls to crawl.</param>
-        private async Task StartCrawlingEngineAsync(IEnumerable<string> urls)
+        private async Task StartCrawlingEngineAsync(IEnumerable<RosterSheet> urls)
         {
-            var manager = new EngineManager(new Crawler(urls), new QueueManager<CrawledPage>());
+            var sheetUrls = urls.Select(t => t.Url);
+            var manager = new EngineManager(new Crawler(sheetUrls), new QueueManager<CrawledPage>());
             await manager.StartAsync();
         }
     }

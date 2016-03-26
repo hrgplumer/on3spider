@@ -11,7 +11,7 @@ namespace SpiderEngine.Engine
 {
     public class PageAnalyzer
     {
-        private IEnumerable<CrawledPage> _pages; 
+        private readonly IEnumerable<CrawledPage> _pages; 
 
         public PageAnalyzer(IEnumerable<CrawledPage> pages )
         {
@@ -31,6 +31,8 @@ namespace SpiderEngine.Engine
         private IList<AnalyzeResult> AnalyzePages()
         {
             Trace.WriteLine($"begin analyzing {_pages.Count()} pages in new thread");
+
+            var results = new List<AnalyzeResult>();
 
 
             Trace.WriteLine("returning from analyzer thread");

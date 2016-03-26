@@ -7,9 +7,15 @@ using LinqToExcel.Attributes;
 
 namespace On3Spider.Models
 {
-    public class ExcelUrl
+    public class RosterSheet : IExcelSheet
     {
-        [ExcelColumn("URL")]
+        [ExcelColumn("Roster URL")]
         public string Url { get; set; }
+
+        [ExcelColumn("School")]
+        public string School { get; set; }
+
+        [ExcelColumn("Sport")]
+        public string Sport { get; set; }
     }
 }

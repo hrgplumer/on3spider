@@ -22,9 +22,9 @@ namespace SpiderEngine.Engine
         private readonly ICrawler _crawler;
         private readonly IQueueManager<CrawledPage> _queue;
 
-        private const int PageAnalyzeThreshold = 10;
+        private const int PageAnalyzeThreshold = 20;
 
-        private bool _allCrawlsCompleted = false;
+        private volatile bool _allCrawlsCompleted = false;
 
         /// <summary>
         /// Create a new EngineManager using the given crawler and queue.
@@ -82,6 +82,8 @@ namespace SpiderEngine.Engine
 
                 }
             }
+
+            Trace.WriteLine("All crawls completed. Shutting down...");
         }
 
         private async Task ProcessPage(IEnumerable<CrawledPage> pages)

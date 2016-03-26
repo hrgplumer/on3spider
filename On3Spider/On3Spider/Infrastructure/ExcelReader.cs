@@ -11,7 +11,7 @@ namespace On3Spider.Infrastructure
     /// <summary>
     /// Class for reading an Excel 2007 spreadsheet using LinqToExcel
     /// </summary>
-    public class ExcelReader
+    public class ExcelReader<T> where T: IExcelSheet
     {
         private readonly string _fileName;
 
@@ -21,10 +21,10 @@ namespace On3Spider.Infrastructure
         }
 
         /// <summary>
-        /// Reads rows from an Excel spreadsheet using the schema laid out in the ExcelUrl class.
+        /// Reads rows from an Excel spreadsheet using the schema laid out in the RosterSheet class.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<string> ReadUrls()
+        public IEnumerable<T> ReadSheet()
         {
             if (String.IsNullOrWhiteSpace(_fileName))
             {
@@ -32,8 +32,8 @@ namespace On3Spider.Infrastructure
             }
 
             var excel = new ExcelQueryFactory(_fileName);
-            var urls = excel.Worksheet<ExcelUrl>().Select(u => u.Url);
-            return urls;
+            var worksheet = excel.Worksheet<T>().ToList();
+            return worksheet;
         } 
 
 
