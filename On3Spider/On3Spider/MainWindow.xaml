@@ -5,17 +5,21 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:On3Spider"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        <DockPanel Margin="10,10,10,276">
-            <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="10,0,23,10" RenderTransformOrigin="-2.025,0.485" Height="28" Width="464">
-                <Button Name="btnOpenFile" Click="btnOpenFile_Click">Open file</Button>
-                <TextBox x:Name="textBox" Height="23" TextWrapping="Wrap" Text="TextBox" Width="409"/>
-            </WrapPanel>
+        Title="On3 Web Spider" Height="350" Width="525">
+    <Grid RenderTransformOrigin="0.499,0.412">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="45*"/>
+            <RowDefinition Height="161*"/>
+        </Grid.RowDefinitions>
+        <DockPanel Height="40">
+            <Button Name="BtnOpenFile" Click="btnOpenFile_Click" Margin="7">Open file</Button>
+            <ComboBox x:Name="comboBox" Width="145" Margin="7" >
+                <ComboBoxItem Content="Set Category" HorizontalAlignment="Left" Width="130" IsSelected="True"/>
+            </ComboBox>
+            <TextBox x:Name="FileNameTextBox" TextWrapping="Wrap" Text="Choose a file" Width="263" IsEnabled="False" Margin="0,7" HorizontalAlignment="Left"/>
         </DockPanel>
-        <DockPanel HorizontalAlignment="Left" Height="31" LastChildFill="False" Margin="20,48,0,0" VerticalAlignment="Top" Width="471">
+        <!--<DockPanel Grid.Row="0" HorizontalAlignment="Left" Height="31" LastChildFill="False" Margin="20,48,0,0" VerticalAlignment="Top" Width="471">
             <ProgressBar Height="31" VerticalAlignment="Top" Width="471"/>
-        </DockPanel>
-        <DockPanel HorizontalAlignment="Left" Height="225" LastChildFill="False" Margin="20,84,0,0" VerticalAlignment="Top" Width="471"/>
+        </DockPanel>-->
     </Grid>
 </Window>

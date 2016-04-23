@@ -18,6 +18,7 @@ using Microsoft.Win32;
 using On3Spider.Infrastructure;
 using On3Spider.Models;
 using SpiderEngine.Engine;
+using Path = System.IO.Path;
 
 namespace On3Spider
 {
@@ -33,17 +34,24 @@ namespace On3Spider
 
         private async void btnOpenFile_Click(object sender, RoutedEventArgs e)
         {
-            //var openFileDialog = new OpenFileDialog()
-            //{
-            //    Filter = "Excel files (*.xlsx)|*.xlsx"
-            //};
+            var fileName = String.Empty;
 
-            //if (openFileDialog.ShowDialog() != true) return;
+#if DEBUG
+            fileName = //openFileDialog.FileName;
+                       //@"E:\j\work\personal\projects\on3\test sheets\simple_test_3_urls.xlsx";
+                        @"E:\j\work\personal\projects\on3\test sheets\softball&baseballurls.xlsx";
+                        //@"E:\j\work\personal\projects\on3\test sheets\FieldHockeyD1URLs.xlsx";
+#elif (!DEBUG)
+            var openFileDialog = new OpenFileDialog()
+            {
+                Filter = "Excel files (*.xlsx)|*.xlsx"
+            };
 
-            var fileName = //openFileDialog.FileName;
-                //@"E:\j\work\personal\projects\on3\test sheets\simple_test_3_urls.xlsx";
-                @"E:\j\work\personal\projects\on3\test sheets\softball&baseballurls.xlsx";
-                //@"E:\j\work\personal\projects\on3\test sheets\FieldHockeyD1URLs.xlsx";
+            if (openFileDialog.ShowDialog() != true) return;
+
+            fileName = openFileDialog.FileName;
+#endif
+            FileNameTextBox.Text = Path.GetFileName(fileName);
 
             var reader = new ExcelReader<RosterSheet>(fileName);
             var urls = reader.ReadSheet().ToList();
