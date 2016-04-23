@@ -18,6 +18,7 @@ using Microsoft.Win32;
 using On3Spider.Infrastructure;
 using On3Spider.Models;
 using SpiderEngine.Engine;
+using SpiderEngine.Infrastructure;
 using Path = System.IO.Path;
 
 namespace On3Spider
@@ -30,6 +31,15 @@ namespace On3Spider
         public MainWindow()
         {
             InitializeComponent();
+            InitializeCategoryComboBox();
+        }
+
+        private void InitializeCategoryComboBox()
+        {
+            foreach (var item in Constants.FileCategory.FileCategoryItems)
+            {
+                CategoryComboBox.Items.Add(item);
+            }
         }
 
         private async void btnOpenFile_Click(object sender, RoutedEventArgs e)

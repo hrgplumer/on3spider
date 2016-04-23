@@ -13,7 +13,7 @@
         </Grid.RowDefinitions>
         <DockPanel Height="40">
             <Button Name="BtnOpenFile" Click="btnOpenFile_Click" Margin="7">Open file</Button>
-            <ComboBox x:Name="comboBox" Width="145" Margin="7" >
+            <ComboBox x:Name="CategoryComboBox" Width="145" Margin="7" >
                 <ComboBoxItem Content="Set Category" HorizontalAlignment="Left" Width="130" IsSelected="True"/>
             </ComboBox>
             <TextBox x:Name="FileNameTextBox" TextWrapping="Wrap" Text="Choose a file" Width="263" IsEnabled="False" Margin="0,7" HorizontalAlignment="Left"/>
