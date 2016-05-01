@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Abot.Poco;
+using CsQuery.ExtensionMethods.Internal;
 using Microsoft.Win32;
 using On3Spider.Infrastructure;
 using On3Spider.Models;
@@ -68,21 +69,30 @@ namespace On3Spider
 
             if (!urls.Any())
             {
+                MessageBox.Show("Error: Could not parse any URLs from the spreadsheet. Please try a different file.");
+                return;
+            }
+
+            // Get URL type from UI dropdown and pass to crawling engine
+            var category = CategoryComboBox.SelectionBoxItem.ToString();
+            if (String.IsNullOrWhiteSpace(category) || category == Constants.FileCategory.DefaultValue)
+            {
+                MessageBox.Show("Select a URL Category to continue.");
                 return;
             }
 
             // Start the crawling engine on a new thread
-            await Task.Run(() => StartCrawlingEngineAsync(urls));
+            await Task.Run(() => StartCrawlingEngineAsync(urls, category));
         }
 
         /// <summary>
         /// Starts the crawling engine.
         /// </summary>
         /// <param name="urls">The list of urls to crawl.</param>
-        private async Task StartCrawlingEngineAsync(IEnumerable<RosterSheet> urls)
+        private async Task StartCrawlingEngineAsync(IEnumerable<RosterSheet> urls, string category)
         {
             var sheetUrls = urls.Select(t => t.Url);
-            var manager = new EngineManager(new Crawler(sheetUrls), new QueueManager<CrawledPage>());
+            var manager = new EngineManager(new Crawler(sheetUrls), category, new QueueManager<CrawledPage>());
             await manager.StartAsync();
         }
     }

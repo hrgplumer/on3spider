@@ -13,6 +13,7 @@ namespace SpiderEngine.Infrastructure
             const string Roster = "Roster";
             const string Schedule = "Schedule";
             const string Homepage = "Homepage";
+            public const string DefaultValue = "Set Category";
 
             public static IList<String> FileCategoryItems => new List<string>
             {

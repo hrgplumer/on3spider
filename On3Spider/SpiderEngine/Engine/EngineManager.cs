@@ -21,7 +21,9 @@ namespace SpiderEngine.Engine
     {
         private readonly ICrawler _crawler;
         private readonly IQueueManager<CrawledPage> _queue;
+        private readonly String _category;
 
+        // this should be moved out to App.config
         private const int PageAnalyzeThreshold = 20;
 
         private volatile bool _allCrawlsCompleted = false;
@@ -31,14 +33,17 @@ namespace SpiderEngine.Engine
         /// </summary>
         /// <param name="crawler">An ICrawler instance. This will be used as the web crawler.</param>
         /// <param name="queue">An IQueueManager instance. This will be used as the thread safe queue for processing crawled pages.</param>
-        public EngineManager(ICrawler crawler, IQueueManager<CrawledPage> queue)
+        public EngineManager(ICrawler crawler, string category, IQueueManager<CrawledPage> queue)
         {
             if (crawler == null)
                 throw new ArgumentNullException(nameof(crawler));
+            if (category == null)
+                throw new ArgumentNullException(nameof(category));
             if (queue == null)
                 throw new ArgumentNullException(nameof(queue));
 
             _crawler = crawler;
+            _category = category;
             _queue = queue;
 
             RegisterCrawlerEvents();
@@ -88,7 +93,7 @@ namespace SpiderEngine.Engine
 
         private async Task ProcessPage(IEnumerable<CrawledPage> pages)
         {
-            var analyzer = new PageAnalyzer(pages);
+            var analyzer = new PageAnalyzer(pages, _category);
             var result = await analyzer.AnalyzeAsync();
         }
 

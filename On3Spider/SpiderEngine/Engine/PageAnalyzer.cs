@@ -11,13 +11,19 @@ namespace SpiderEngine.Engine
 {
     public class PageAnalyzer
     {
-        private readonly IEnumerable<CrawledPage> _pages; 
+        private readonly IEnumerable<CrawledPage> _pages;
+        private readonly String _category;
 
-        public PageAnalyzer(IEnumerable<CrawledPage> pages )
+        public PageAnalyzer(IEnumerable<CrawledPage> pages, string category )
         {
             _pages = pages;
+            _category = category;
         }
 
+        /// <summary>
+        /// Kickoff method to analyze pages asyncronously
+        /// </summary>
+        /// <returns></returns>
         public async Task<IList<AnalyzeResult>> AnalyzeAsync()
         {
             if (_pages == null || !_pages.Any())
@@ -28,11 +34,16 @@ namespace SpiderEngine.Engine
             return await Task.Run(() => AnalyzePages());
         }
 
+        /// <summary>
+        /// Magic page analyzing goes in here
+        /// </summary>
+        /// <returns></returns>
         private IList<AnalyzeResult> AnalyzePages()
         {
             Trace.WriteLine($"begin analyzing {_pages.Count()} pages in new thread");
 
             var results = new List<AnalyzeResult>();
+
 
 
             Trace.WriteLine("returning from analyzer thread");
