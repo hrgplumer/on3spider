@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Abot.Poco;
+using SpiderEngine.Infrastructure;
 using SpiderEngine.Models;
 
 namespace SpiderEngine.Engine
@@ -44,10 +45,20 @@ namespace SpiderEngine.Engine
 
             var results = new List<AnalyzeResult>();
 
-
+            switch (_category)
+            {
+                case Constants.FileCategory.Roster:
+                    results = AnalyzeRosterUrls();
+                    break;
+            }
 
             Trace.WriteLine("returning from analyzer thread");
-            return new List<AnalyzeResult>();
+            return results;
+        }
+
+        private List<AnalyzeResult> AnalyzeRosterUrls()
+        {
+            return null;
         } 
     }
 }

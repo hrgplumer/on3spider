@@ -10,9 +10,9 @@ namespace SpiderEngine.Infrastructure
     {
         public static class FileCategory
         {
-            const string Roster = "Roster";
-            const string Schedule = "Schedule";
-            const string Homepage = "Homepage";
+            public const string Roster = "Roster";
+            public const string Schedule = "Schedule";
+            public const string Homepage = "Homepage";
             public const string DefaultValue = "Set Category";
 
             public static IList<String> FileCategoryItems => new List<string>

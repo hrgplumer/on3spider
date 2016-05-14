@@ -32,6 +32,7 @@ namespace SpiderEngine.Engine
         /// Create a new EngineManager using the given crawler and queue.
         /// </summary>
         /// <param name="crawler">An ICrawler instance. This will be used as the web crawler.</param>
+        /// <param name="category"></param>
         /// <param name="queue">An IQueueManager instance. This will be used as the thread safe queue for processing crawled pages.</param>
         public EngineManager(ICrawler crawler, string category, IQueueManager<CrawledPage> queue)
         {
