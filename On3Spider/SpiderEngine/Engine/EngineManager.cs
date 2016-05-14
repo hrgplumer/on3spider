@@ -22,6 +22,7 @@ namespace SpiderEngine.Engine
         private readonly ICrawler _crawler;
         private readonly IQueueManager<CrawledPage> _queue;
         private readonly String _category;
+        private readonly Dictionary<string, ISheetRow> _urlDictionary;
 
         // this should be moved out to App.config
         private const int PageAnalyzeThreshold = 20;
@@ -34,17 +35,20 @@ namespace SpiderEngine.Engine
         /// <param name="crawler">An ICrawler instance. This will be used as the web crawler.</param>
         /// <param name="category"></param>
         /// <param name="queue">An IQueueManager instance. This will be used as the thread safe queue for processing crawled pages.</param>
-        public EngineManager(ICrawler crawler, string category, IQueueManager<CrawledPage> queue)
+        public EngineManager(ICrawler crawler, string category, Dictionary<string, ISheetRow> urlDict, IQueueManager<CrawledPage> queue)
         {
             if (crawler == null)
                 throw new ArgumentNullException(nameof(crawler));
             if (category == null)
                 throw new ArgumentNullException(nameof(category));
+            if (urlDict == null)
+                throw new ArgumentNullException(nameof(urlDict));
             if (queue == null)
                 throw new ArgumentNullException(nameof(queue));
 
             _crawler = crawler;
             _category = category;
+            _urlDictionary = urlDict;
             _queue = queue;
 
             RegisterCrawlerEvents();

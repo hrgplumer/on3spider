@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Abot.Poco;
 using SpiderEngine.Infrastructure;
+using SpiderEngine.Interface;
 using SpiderEngine.Models;
 
 namespace SpiderEngine.Engine
@@ -14,11 +15,13 @@ namespace SpiderEngine.Engine
     {
         private readonly IEnumerable<CrawledPage> _pages;
         private readonly String _category;
+        private readonly Dictionary<string, ISheetRow> _urlDictionary; 
 
-        public PageAnalyzer(IEnumerable<CrawledPage> pages, string category )
+        public PageAnalyzer(IEnumerable<CrawledPage> pages, string category, Dictionary<string, ISheetRow> urlDict)
         {
             _pages = pages;
             _category = category;
+            _urlDictionary = urlDict;
         }
 
         /// <summary>

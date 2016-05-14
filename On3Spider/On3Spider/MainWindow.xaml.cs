@@ -20,6 +20,7 @@ using On3Spider.Infrastructure;
 using On3Spider.Models;
 using SpiderEngine.Engine;
 using SpiderEngine.Infrastructure;
+using SpiderEngine.Interface;
 using Path = System.IO.Path;
 
 namespace On3Spider
@@ -81,19 +82,25 @@ namespace On3Spider
                 return;
             }
 
+            // Create info dictionary to propagate original info from spreadsheet thru the app
+            var urlInfoDict = new Dictionary<string, ISheetRow>();
+            foreach (var row in urls)
+            {
+                urlInfoDict.Add(row.Url, row);
+            }
+
             // Start the crawling engine on a new thread
-            await Task.Run(() => StartCrawlingEngineAsync(urls, category));
+            await Task.Run(() => StartCrawlingEngineAsync(urlInfoDict, category));
         }
 
         /// <summary>
         /// Starts the crawling engine.
         /// </summary>
-        /// <param name="urls">The list of urls to crawl.</param>
+        /// <param name="urlDictionary">The list of urls to crawl.</param>
         /// <param name="category">The category of these urls.</param>
-        private async Task StartCrawlingEngineAsync(IEnumerable<RosterSheet> urls, string category)
+        private async Task StartCrawlingEngineAsync(Dictionary<string, ISheetRow> urlDictionary, string category)
         {
-            var sheetUrls = urls.Select(t => t.Url);
-            var manager = new EngineManager(new Crawler(sheetUrls), category, new QueueManager<CrawledPage>());
+            var manager = new EngineManager(new Crawler(urlDictionary.Keys), category, urlDictionary, new QueueManager<CrawledPage>());
             await manager.StartAsync();
         }
     }
