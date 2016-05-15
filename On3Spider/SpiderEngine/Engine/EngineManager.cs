@@ -98,7 +98,7 @@ namespace SpiderEngine.Engine
 
         private async Task ProcessPage(IEnumerable<CrawledPage> pages)
         {
-            var analyzer = new PageAnalyzer(pages, _category);
+            var analyzer = new PageAnalyzer(pages, _category, _urlDictionary);
             var result = await analyzer.AnalyzeAsync();
         }
 

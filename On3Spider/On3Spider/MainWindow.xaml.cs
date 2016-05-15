@@ -83,11 +83,7 @@ namespace On3Spider
             }
 
             // Create info dictionary to propagate original info from spreadsheet thru the app
-            var urlInfoDict = new Dictionary<string, ISheetRow>();
-            foreach (var row in urls)
-            {
-                urlInfoDict.Add(row.Url, row);
-            }
+            var urlInfoDict = urls.ToDictionary<RosterSheet, string, ISheetRow>(row => row.Url, row => row);
 
             // Start the crawling engine on a new thread
             await Task.Run(() => StartCrawlingEngineAsync(urlInfoDict, category));

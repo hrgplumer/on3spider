@@ -8,6 +8,8 @@ using Abot.Poco;
 using SpiderEngine.Infrastructure;
 using SpiderEngine.Interface;
 using SpiderEngine.Models;
+using HtmlAgilityPack;
+using SpiderEngine.Repository;
 
 namespace SpiderEngine.Engine
 {
@@ -61,7 +63,39 @@ namespace SpiderEngine.Engine
 
         private List<AnalyzeResult> AnalyzeRosterUrls()
         {
+
+            foreach (var page in _pages)
+            {
+                var html = page.HtmlDocument;
+
+                // assume the roster will be in a table. grab all tables
+                var tables = html.DocumentNode.SelectNodes("//table");
+                if (tables == null)
+                {
+                    continue; // move to next page
+                }
+
+                foreach (var table in tables)
+                {
+                    // look for table header. if not found, use first row
+                    var tHead = table.SelectSingleNode("//thead");
+                    var firstRow = tHead != null ? tHead.SelectSingleNode("./tr") : table.SelectSingleNode(".//tr");
+
+                    // get cells of first row. determine column names from this row
+                    var headerCells = firstRow.SelectNodes("./th | ./td");
+
+                    // look for player number column
+                    var playerNumRegex = RegexRepository.NumberColumnRegex();
+                    var playerNumberCell = headerCells.FirstOrDefault(cell => playerNumRegex.IsMatch(cell.InnerText));
+                    // get index of this column
+                    var playerNumberCellIdx = headerCells.IndexOf(playerNumberCell);
+
+
+                }
+
+            }
+
             return null;
-        } 
+        }
     }
 }
