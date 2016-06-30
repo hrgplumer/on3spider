@@ -100,6 +100,7 @@ namespace SpiderEngine.Engine
         {
             var analyzer = new PageAnalyzer(pages, _category, _urlDictionary);
             var result = await analyzer.AnalyzeAsync();
+            var x = 0;
         }
 
         /// <summary>

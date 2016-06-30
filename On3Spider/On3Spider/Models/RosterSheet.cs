@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LinqToExcel.Attributes;
 using SpiderEngine.Interface;
+using SpiderEngine.Models.Result;
 
 namespace On3Spider.Models
 {
@@ -18,5 +19,7 @@ namespace On3Spider.Models
 
         [ExcelColumn("Sport")]
         public string Sport { get; set; }
+
+        public RosterResult Results { get; set; }
     }
 }
